@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "dystill"
+version = "0.0.1"
+description = ""
+authors = ["Harshad <iHarshad@users.noreply.github.com>"]
+readme = "README.md"
+packages = [
+  { include = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pydantic = "^2.9.2"
+tomli = "^2.0.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.10.0"
+isort = "^5.13.2"
+pre-commit = "^4.0.1"
+alembic = "^1.13.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "src.main:main"
