@@ -14,6 +14,7 @@ class EmailRule(BaseModel):
 class EmailAccount(BaseModel):
     account_name: str
     account_token: str
+    account_file: str
     rules: List[EmailRule] = []
 
     @validator("rules", pre=True)
@@ -43,7 +44,15 @@ class app_config(BaseModel):
         for toml_file in values["APP_HOME_DIR"].glob("account*.toml"):
             try:
                 with open(toml_file, "rb") as file:
-                    account_data = tomli.load(file)
+                    toml_data = tomli.load(file)
+                    credentials_data = toml_data.get("credentials", {})
+                    rules_data = toml_data.get("rules", [])
+                    account_data = {
+                        "account_file": str(toml_file),
+                        "account_name": credentials_data.get("account_name"),
+                        "account_token": credentials_data.get("account_token"),
+                        "rules": rules_data,
+                    }
                     accounts.append(EmailAccount(**account_data))
             except Exception as e:
                 print(f"Error loading account details from {toml_file}: {e}")
@@ -52,25 +61,13 @@ class app_config(BaseModel):
     def print_helper_message(self):
         """Prints a helper message on how to configure accounts. Exits the program."""
 
-        print(f"No accounts configured. To add an account:")
-        print(f"\n1. Create a TOML file in {self.APP_HOME_DIR} named 'account.toml'")
-        print(f"\n2. Add the following data to the file (replace placeholders):")
-        print(f"  ```toml")
-        print(f"  [credentials]")
-        print(f'  account_name = "YourAccountName"')
-        print(f'  account_token = "YourAccountToken"')
-        print(f"  rules = [")
-        print(f"      # Add email rules here")
+        print("No accounts configured. To add an account:")
+        print(f"\n1. Create a TOML file in {self.APP_HOME_DIR} named 'account*.toml'")
+        print("\n2. Add account credentials and rules to it")
         print(
-            f"      # Example:\n      { {'filter': 'from:example.com', 'action': 'spam'} }"
+            "\n3. You can setup multiple accounts each in a separate TOML config file using `account` perfix:"
         )
-        print(f"      { {'filter': 'subject:important', 'action': 'mark_important'} }")
-        print(f"  ]")
-        print(f"  ```")
-        print(
-            f"\n3. You can setup multiple accounts each in a separate TOML config file using `account` perfix:"
-        )
-        print(f"\taccount.toml\n\taccount2.toml\n\taccount-primary.toml")
+        print("\taccount.toml\n\taccount2.toml\n\taccount-primary.toml")
 
     def __init__(self, *args, **kwargs):
         """Initializes the app_config, checks for accounts, and exits if none are found."""

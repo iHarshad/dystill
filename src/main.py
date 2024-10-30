@@ -1,4 +1,4 @@
-from .utils.config import app_config
+from src.utils.config import app_config
 
 config = app_config()
 
